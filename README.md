@@ -1,4 +1,7 @@
-# Jekyll Netlify Boilerplate
+# Levon Website
+Coming soon...
+
+<!-- # Jekyll Netlify Boilerplate
 
 *Note: Check out my [Eleventy Netlify Boilerplate](https://github.com/danurbanowicz/eleventy-netlify-boilerplate). It does pretty much the same as this project but uses the [Eleventy](https://www.11ty.io/) static site generator. It's fast, flexible and doesn't require Ruby.*
 
@@ -88,4 +91,4 @@ Now navigate to [localhost:4000](http://localhost:4000/) to preview the site, an
 
 This is an ongoing project and I welcome contributions. Feel free to submit a PR.
 
-If you need any help with setting up Netlify CMS, you can reach out to the Netlify team in the [Netlify CMS Gitter](https://gitter.im/netlify/netlifycms).
+If you need any help with setting up Netlify CMS, you can reach out to the Netlify team in the [Netlify CMS Gitter](https://gitter.im/netlify/netlifycms). -->

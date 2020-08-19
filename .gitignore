@@ -1,4 +1,2 @@
-_site
+dist
 .sass-cache
-.jekyll-metadata
-.users.yml

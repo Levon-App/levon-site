@@ -1,9 +1,6 @@
 [build]
-  command = "jekyll build"
-  publish = "_site"
-
-[build.environment]
-  JEKYLL_ENV = "production"
+  command = "gulp build"
+  publish = "dist"
 
 # REDIRECT and HEADERS examples.
 # Uncomment to use. Directives in this file will ALWAYS override any identical
