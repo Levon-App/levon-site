@@ -19,11 +19,12 @@ const { class: className } = Astro.props;
 const CLUSTER = { w: 868, h: 901 };
 const PICK = { w: 443.564, h: 514.774 };
 // `stackTilt` is each pick's angle in the starting stack, before it fans out.
+// `depth` is how far the pick drifts toward the mouse (front picks move most).
 const positions = [
-  { left: 186.65, top: 0, stackTilt: -6 },
-  { left: 0, top: 201.47, stackTilt: 4 },
-  { left: 424.44, top: 118.31, stackTilt: -2 },
-  { left: 269.15, top: 386.23, stackTilt: 2 },
+  { left: 186.65, top: 0, stackTilt: -6, depth: 0.6 },
+  { left: 0, top: 201.47, stackTilt: 4, depth: 0.8 },
+  { left: 424.44, top: 118.31, stackTilt: -2, depth: 0.9 },
+  { left: 269.15, top: 386.23, stackTilt: 2, depth: 1.2 },
 ];
 
 const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(3)}%`;
@@ -40,6 +41,12 @@ const resolveColor = (color: HeroPick['color']) =>
 const sizes =
   '(min-width: 1200px) 246px, (min-width: 992px) 225px, (min-width: 768px) 133px, (max-width: 480px) 103px, 51vw';
 ---
+
+<svg width="0" height="0" class="absolute" aria-hidden="true">
+  <clipPath id="pick-clip" clipPathUnits="objectBoundingBox">
+    <path d="M.5 0C.1667 0 0 .1429 0 .2857 0 .5714.3333 1 .5 1S1 .5714 1 .2857C1 .1429.8333 0 .5 0Z" />
+  </clipPath>
+</svg>
 
 <div
   class:list={['pick-cluster relative aspect-[868/901] w-full', className]}
@@ -62,8 +69,10 @@ const sizes =
             `--stack-y: ${stack.y}`,
             `--stack-tilt: ${pos.stackTilt}deg`,
             `--pick-index: ${i}`,
+            `--pick-depth: ${pos.depth}`,
           ].join('; ')}
         >
+          <div class="pick-motion">
           <div class="pick-shape">
             <Image
               src={pick.photo}
@@ -76,6 +85,7 @@ const sizes =
             />
             <div class="pick-tint" aria-hidden="true" />
             <div class="pick-letter" aria-hidden="true" />
+          </div>
           </div>
         </div>
       );
@@ -90,9 +100,11 @@ const sizes =
 
   /* Drop shadow sits outside the mask so it isn't clipped. */
   .pick {
-    filter: drop-shadow(0 1.814cqw 1.209cqw rgb(1 1 1 / 0.15));
-    animation: pick-fan 1500ms both;
-    animation-delay: calc(150ms + var(--pick-index) * 50ms);
+    --shadow: 0 1.814cqw 1.209cqw;
+    filter: drop-shadow(var(--shadow) rgb(1 1 1 / 0.15));
+    /* Sits as a stack for a beat (the delay), then fans out. */
+    animation: pick-fan 1000ms cubic-bezier(0.34, 1.2, 0.5, 1) both;
+    animation-delay: calc(500ms + var(--pick-index) * 40ms);
   }
 
   .pick-shape {
@@ -102,6 +114,50 @@ const sizes =
     overflow: hidden;
     isolation: isolate;
     mask: var(--pick-mask) center / 100% 100% no-repeat;
+    /* Same shape as the mask, so hovering only counts on the pick itself. */
+    clip-path: url(#pick-clip);
+  }
+
+  /*
+   * Mouse follow: the script below sets --mx / --my (-1 to 1) on the cluster
+   * and each pick drifts toward the pointer by its depth.
+   */
+  .pick-motion {
+    width: 100%;
+    height: 100%;
+    translate: calc(var(--mx, 0) * var(--pick-depth) * 2cqw) calc(var(--my, 0) * var(--pick-depth) * 2cqw);
+    transition: translate 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Hover: the pick lifts slightly and wiggles. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .pick-shape {
+      transform-origin: 50% 60%;
+      transition: scale 250ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .pick-shape:hover {
+      scale: 1.04;
+      animation: pick-wiggle 650ms ease-in-out;
+    }
+  }
+
+  @keyframes pick-wiggle {
+    0%,
+    100% {
+      rotate: 0deg;
+    }
+    20% {
+      rotate: -5deg;
+    }
+    40% {
+      rotate: 4deg;
+    }
+    60% {
+      rotate: -2.5deg;
+    }
+    80% {
+      rotate: 1deg;
+    }
   }
 
   .pick-photo {
@@ -130,29 +186,65 @@ const sizes =
   }
 
   /*
-   * The picks arrive as one neat stack in the middle of the cluster, then
-   * fan out to their spots. The "L" is part of each pick and never moves.
+   * The picks start as one stack in the middle of the cluster, then fan
+   * out to their spots. The "L" is part of each pick and never moves.
    */
   @keyframes pick-fan {
-    0% {
-      opacity: 0;
-      transform: translate3d(var(--stack-x), calc(var(--stack-y) + 8%), 0) rotate(var(--stack-tilt)) scale(0.9);
-      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    from {
+      transform: translate3d(var(--stack-x), var(--stack-y), 0) rotate(var(--stack-tilt));
+      filter: drop-shadow(var(--shadow) rgb(1 1 1 / 0.04));
     }
-    30% {
-      opacity: 1;
-      transform: translate3d(var(--stack-x), var(--stack-y), 0) rotate(var(--stack-tilt)) scale(1);
-      animation-timing-function: cubic-bezier(0.34, 1.25, 0.5, 1);
-    }
-    100% {
-      opacity: 1;
+    to {
       transform: none;
+      filter: drop-shadow(var(--shadow) rgb(1 1 1 / 0.15));
     }
   }
-
   @media (prefers-reduced-motion: reduce) {
-    .pick {
+    .pick,
+    .pick-motion {
       animation: none;
+      transition: none;
+      translate: none;
     }
   }
 </style>
+
+<script>
+  // Let the picks drift a little toward the mouse (fine pointers only).
+  const clusters = document.querySelectorAll<HTMLElement>('.pick-cluster');
+  const canFollow =
+    matchMedia('(hover: hover) and (pointer: fine)').matches &&
+    !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (clusters.length && canFollow) {
+    const clamp = (n: number) => Math.max(-1, Math.min(1, n));
+    let x = 0;
+    let y = 0;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      for (const cluster of clusters) {
+        const r = cluster.getBoundingClientRect();
+        cluster.style.setProperty('--mx', clamp((x - (r.left + r.width / 2)) / r.width).toFixed(3));
+        cluster.style.setProperty('--my', clamp((y - (r.top + r.height / 2)) / r.height).toFixed(3));
+      }
+    };
+
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        x = e.clientX;
+        y = e.clientY;
+        frame ||= requestAnimationFrame(update);
+      },
+      { passive: true },
+    );
+    document.documentElement.addEventListener('pointerleave', () => {
+      for (const cluster of clusters) {
+        cluster.style.setProperty('--mx', '0');
+        cluster.style.setProperty('--my', '0');
+      }
+    });
+  }
+</script>
