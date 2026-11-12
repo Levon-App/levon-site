@@ -1,0 +1,221 @@
+---
+/*
+ * Four overlapping guitar picks, each a black-and-white photo tinted with a
+ * brand color and cut out with the Levon "L". Built from the pick-cluster
+ * component in the Levon Brand Standards Figma file. Photos and colors come
+ * from src/data/hero.ts; the load animation lives in global.css.
+ */
+import { Image } from 'astro:assets';
+import { heroPicks, brandColors, type HeroPick } from '../data/hero';
+import pickMask from '../assets/hero/pick.svg?url';
+import letterform from '../assets/hero/letterform.svg?url';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+
+// Pick positions within the 868 × 901 cluster, from Figma (left, top in px).
+const CLUSTER = { w: 868, h: 901 };
+const PICK = { w: 443.564, h: 514.774 };
+// `stackTilt` is each pick's angle in the starting stack, before it fans out.
+// `depth` is how far the pick drifts toward the mouse (front picks move most).
+const positions = [
+  { left: 186.65, top: 0, stackTilt: -6, depth: 0.6 },
+  { left: 0, top: 201.47, stackTilt: 4, depth: 0.8 },
+  { left: 424.44, top: 118.31, stackTilt: -2, depth: 0.9 },
+  { left: 269.15, top: 386.23, stackTilt: 2, depth: 1.2 },
+];
+
+const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(3)}%`;
+// Offset that moves a pick from its final spot to the cluster's center,
+// as a percentage of the pick's own size (what CSS translate % uses).
+const stackOffset = (left: number, top: number) => ({
+  x: pct(CLUSTER.w / 2 - (left + PICK.w / 2), PICK.w),
+  y: pct(CLUSTER.h / 2 - (top + PICK.h / 2), PICK.h),
+});
+const resolveColor = (color: HeroPick['color']) =>
+  color in brandColors ? brandColors[color as keyof typeof brandColors] : color;
+
+// Rendered pick width at each breakpoint (cluster width × 51.1%).
+const sizes =
+  '(min-width: 1200px) 246px, (min-width: 992px) 225px, (min-width: 768px) 133px, (max-width: 480px) 103px, 51vw';
+---
+
+<div
+  class:list={['pick-cluster relative aspect-[868/901] w-full', className]}
+  style={`--pick-mask: url("${pickMask}"); --letterform: url("${letterform}");`}
+>
+  {
+    heroPicks.map((pick, i) => {
+      const pos = positions[i]!;
+      const stack = stackOffset(pos.left, pos.top);
+      return (
+        <div
+          class="pick absolute"
+          style={[
+            `left: ${pct(pos.left, CLUSTER.w)}`,
+            `top: ${pct(pos.top, CLUSTER.h)}`,
+            `width: ${pct(PICK.w, CLUSTER.w)}`,
+            `height: ${pct(PICK.h, CLUSTER.h)}`,
+            `--pick-color: ${resolveColor(pick.color)}`,
+            `--stack-x: ${stack.x}`,
+            `--stack-y: ${stack.y}`,
+            `--stack-tilt: ${pos.stackTilt}deg`,
+            `--pick-index: ${i}`,
+            `--pick-depth: ${pos.depth}`,
+          ].join('; ')}
+        >
+          <div class="pick-motion">
+          <div class="pick-shape">
+            <Image
+              src={pick.photo}
+              alt={pick.alt}
+              widths={[280, 540]}
+              sizes={sizes}
+              loading="eager"
+              class="pick-photo"
+              style={pick.focus ? `object-position: ${pick.focus}` : undefined}
+            />
+            <div class="pick-tint" aria-hidden="true" />
+            <div class="pick-letter" aria-hidden="true" />
+          </div>
+          </div>
+        </div>
+      );
+    })
+  }
+</div>
+
+<style>
+  .pick-cluster {
+    container-type: inline-size;
+  }
+
+  /* Drop shadow sits outside the mask so it isn't clipped. */
+  .pick {
+    --shadow: 0 1.814cqw 1.209cqw;
+    filter: drop-shadow(var(--shadow) rgb(1 1 1 / 0.15));
+    /* Sits as a stack for a beat (the delay), then fans out. */
+    animation: pick-fan 1000ms cubic-bezier(0.34, 1.2, 0.5, 1) both;
+    animation-delay: calc(500ms + var(--pick-index) * 40ms);
+  }
+
+  .pick-shape {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    isolation: isolate;
+    mask: var(--pick-mask) center / 100% 100% no-repeat;
+  }
+
+  /*
+   * Mouse follow: the script below sets --mx / --my (-1 to 1) on the cluster
+   * and each pick drifts toward the pointer by its depth.
+   * Spread: hovering the cluster pushes the picks apart, along the same line
+   * they fanned out on (12% of the way from the stack).
+   */
+  .pick-motion {
+    width: 100%;
+    height: 100%;
+    translate:
+      calc(var(--mx, 0) * var(--pick-depth) * 2cqw - var(--spread, 0) * var(--stack-x) * 0.12)
+      calc(var(--my, 0) * var(--pick-depth) * 2cqw - var(--spread, 0) * var(--stack-y) * 0.12);
+    transition: translate 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (hover: hover) {
+    .pick-cluster:hover {
+      --spread: 1;
+    }
+  }
+
+  .pick-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    filter: grayscale(1);
+  }
+
+  .pick-tint {
+    position: absolute;
+    inset: 0;
+    background: var(--pick-color);
+    mix-blend-mode: multiply;
+    opacity: 0.7;
+  }
+
+  /* The "L", positioned as in Figma (insets 21.98% 32.92% 36.49% 33.27%). */
+  .pick-letter {
+    position: absolute;
+    inset: 21.98% 32.92% 36.49% 33.27%;
+    background: var(--letterform) center / 100% 100% no-repeat;
+  }
+
+  /*
+   * The picks start as one stack in the middle of the cluster, then fan
+   * out to their spots. The "L" is part of each pick and never moves.
+   */
+  @keyframes pick-fan {
+    from {
+      transform: translate3d(var(--stack-x), var(--stack-y), 0) rotate(var(--stack-tilt));
+      filter: drop-shadow(var(--shadow) rgb(1 1 1 / 0.04));
+    }
+    to {
+      transform: none;
+      filter: drop-shadow(var(--shadow) rgb(1 1 1 / 0.15));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pick,
+    .pick-motion {
+      animation: none;
+      transition: none;
+      translate: none;
+    }
+  }
+</style>
+
+<script>
+  // Let the picks drift a little toward the mouse (fine pointers only).
+  const clusters = document.querySelectorAll<HTMLElement>('.pick-cluster');
+  const canFollow =
+    matchMedia('(hover: hover) and (pointer: fine)').matches &&
+    !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (clusters.length && canFollow) {
+    const clamp = (n: number) => Math.max(-1, Math.min(1, n));
+    let x = 0;
+    let y = 0;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      for (const cluster of clusters) {
+        const r = cluster.getBoundingClientRect();
+        cluster.style.setProperty('--mx', clamp((x - (r.left + r.width / 2)) / r.width).toFixed(3));
+        cluster.style.setProperty('--my', clamp((y - (r.top + r.height / 2)) / r.height).toFixed(3));
+      }
+    };
+
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        x = e.clientX;
+        y = e.clientY;
+        frame ||= requestAnimationFrame(update);
+      },
+      { passive: true },
+    );
+    document.documentElement.addEventListener('pointerleave', () => {
+      for (const cluster of clusters) {
+        cluster.style.setProperty('--mx', '0');
+        cluster.style.setProperty('--my', '0');
+      }
+    });
+  }
+</script>

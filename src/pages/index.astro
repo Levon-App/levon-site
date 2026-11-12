@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import WaitlistForm from '../components/WaitlistForm.astro';
+import PickCluster from '../components/PickCluster.astro';
+---
+
+<Base>
+  <Header />
+
+  <main>
+    <section class="container py-12">
+      <div class="-mx-5 flex flex-wrap items-center">
+        <div class="w-full px-5 md:order-2 md:w-5/12 lg:w-1/2">
+          <PickCluster class="mb-8 max-phone:max-w-[200px] md:mb-0" />
+        </div>
+
+        <div class="motion-safe-only w-full animate-fade-up px-5 md:order-1 md:w-7/12 lg:w-1/2">
+          <h1 class="mb-4 text-[72px] leading-[0.8] font-extrabold tracking-[-0.02em] max-phone:text-[48px]">
+            Rent gear, rock on.
+          </h1>
+
+          <p class="mb-4 text-[19px] leading-[1.45] tracking-[-0.03em] lg:text-[21px]">
+            With Levon, you can rent instruments, gear and spaces near you. Make money by lending your own stuff to musicians nearby.
+          </p>
+
+          <p class="mb-[27.2px] text-[16px] leading-[27.2px] tracking-[-0.03em] text-muted">
+            We’re hard at work building the Levon experience! Sign up below to get an update when it’s ready on iOS and Android.
+          </p>
+
+          <WaitlistForm />
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Base>
