@@ -42,12 +42,6 @@ const sizes =
   '(min-width: 1200px) 246px, (min-width: 992px) 225px, (min-width: 768px) 133px, (max-width: 480px) 103px, 51vw';
 ---
 
-<svg width="0" height="0" class="absolute" aria-hidden="true">
-  <clipPath id="pick-clip" clipPathUnits="objectBoundingBox">
-    <path d="M.5 0C.1667 0 0 .1429 0 .2857 0 .5714.3333 1 .5 1S1 .5714 1 .2857C1 .1429.8333 0 .5 0Z" />
-  </clipPath>
-</svg>
-
 <div
   class:list={['pick-cluster relative aspect-[868/901] w-full', className]}
   style={`--pick-mask: url("${pickMask}"); --letterform: url("${letterform}");`}
@@ -114,49 +108,26 @@ const sizes =
     overflow: hidden;
     isolation: isolate;
     mask: var(--pick-mask) center / 100% 100% no-repeat;
-    /* Same shape as the mask, so hovering only counts on the pick itself. */
-    clip-path: url(#pick-clip);
   }
 
   /*
    * Mouse follow: the script below sets --mx / --my (-1 to 1) on the cluster
    * and each pick drifts toward the pointer by its depth.
+   * Spread: hovering the cluster pushes the picks apart, along the same line
+   * they fanned out on (12% of the way from the stack).
    */
   .pick-motion {
     width: 100%;
     height: 100%;
-    translate: calc(var(--mx, 0) * var(--pick-depth) * 2cqw) calc(var(--my, 0) * var(--pick-depth) * 2cqw);
-    transition: translate 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    translate:
+      calc(var(--mx, 0) * var(--pick-depth) * 2cqw - var(--spread, 0) * var(--stack-x) * 0.12)
+      calc(var(--my, 0) * var(--pick-depth) * 2cqw - var(--spread, 0) * var(--stack-y) * 0.12);
+    transition: translate 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Hover: the pick lifts slightly and wiggles. */
-  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-    .pick-shape {
-      transform-origin: 50% 60%;
-      transition: scale 250ms cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .pick-shape:hover {
-      scale: 1.04;
-      animation: pick-wiggle 650ms ease-in-out;
-    }
-  }
-
-  @keyframes pick-wiggle {
-    0%,
-    100% {
-      rotate: 0deg;
-    }
-    20% {
-      rotate: -5deg;
-    }
-    40% {
-      rotate: 4deg;
-    }
-    60% {
-      rotate: -2.5deg;
-    }
-    80% {
-      rotate: 1deg;
+  @media (hover: hover) {
+    .pick-cluster:hover {
+      --spread: 1;
     }
   }
 

@@ -34,4 +34,4 @@ The four guitar picks are set in `src/data/hero.ts`.
 - **Photo:** drop an image into `src/assets/hero/`, import it at the top of `hero.ts`, and set it as a pick's `photo`. Any size or color works; it's cropped to the pick shape and turned black and white. Use `focus` (for example `'center top'`) to choose what stays in frame.
 - **Color:** set a pick's `color` to a brand color (`yellow-submarine`, `pink-cadillac`, `blue-suede-shoes`, `green-river`) or any CSS color. Brand colors are defined in `src/styles/global.css`.
 
-When the page loads, the picks start as a single stack and then fan out to their spots. Hovering a pick makes it wiggle, and the cluster drifts slightly toward the mouse. Visitors who turn on reduced motion get the static cluster.
+When the page loads, the picks start as a single stack and then fan out to their spots. Hovering the cluster spreads the picks slightly apart, and they drift a little toward the mouse. Visitors who turn on reduced motion get the static cluster.
