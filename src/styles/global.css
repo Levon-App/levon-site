@@ -8,14 +8,11 @@
 @theme {
   --font-sans: 'Work Sans Variable', 'Work Sans', ui-sans-serif, system-ui, sans-serif;
 
-  --color-brand: #4600f2; /* Levon purple: logo, buttons */
-  --color-ink: #1b1b1b; /* headings and body copy */
-  --color-muted: #707070; /* supporting copy */
-  --color-footer: #506690; /* footer text */
-  --color-field-text: #161c2d;
-  --color-field-border: #f1f4f8;
-  --color-field-focus: #a7b9f6;
-  --color-placeholder: #869ab8;
+  --color-brand: #4600f2; /* Levon Blue (Brand Standards) */
+  --color-page: var(--color-brand); /* page background */
+  --color-ink: #ffffff; /* logo, headings and body copy */
+  --color-muted: rgb(255 255 255 / 0.75); /* supporting copy */
+  --color-footer: rgb(255 255 255 / 0.75); /* footer text */
 
   /* Hero pick tints (Levon Brand Standards) */
   --color-yellow-submarine: #f0df69;
@@ -67,7 +64,7 @@
 
 @layer base {
   body {
-    @apply bg-white font-sans text-ink;
+    @apply bg-page font-sans text-ink;
     font-size: 17px;
     line-height: 1.6;
   }

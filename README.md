@@ -23,7 +23,7 @@ npm run preview  # serve the production build
 - `src/styles/global.css`: design tokens (colors, fonts, breakpoints) and the load animation
 - `src/components/PickCluster.astro`: the animated guitar-pick hero
 - `src/data/hero.ts`: hero photos and colors (see below)
-- `src/assets/`: logo, hero photos, pick shape and icons (photos are converted to responsive WebP at build time)
+- `src/assets/`: logo, hero photos and pick shape (photos are converted to responsive WebP at build time)
 - `public/`: files served as-is (favicon)
 - `netlify.toml`: Netlify build settings (`npm run build`, publishes `dist/`)
 
