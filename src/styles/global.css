@@ -17,6 +17,12 @@
   --color-field-focus: #a7b9f6;
   --color-placeholder: #869ab8;
 
+  /* Hero pick tints (Levon Brand Standards) */
+  --color-yellow-submarine: #f0df69;
+  --color-pink-cadillac: #f761af;
+  --color-blue-suede-shoes: #72c7e5;
+  --color-green-river: #03a678;
+
   /* Layout breakpoints carried over from the original site */
   --breakpoint-sm: 576px;
   --breakpoint-md: 768px;
