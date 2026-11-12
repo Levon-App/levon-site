@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/work-sans';
+
+/*
+ * Levon design tokens. Every brand color and font lives here, so a design
+ * change starts in this block.
+ */
+@theme {
+  --font-sans: 'Work Sans Variable', 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: #4600f2; /* Levon purple: logo, buttons */
+  --color-ink: #1b1b1b; /* headings and body copy */
+  --color-muted: #707070; /* supporting copy */
+  --color-footer: #506690; /* footer text */
+  --color-field-text: #161c2d;
+  --color-field-border: #f1f4f8;
+  --color-field-focus: #a7b9f6;
+  --color-placeholder: #869ab8;
+
+  /* Layout breakpoints carried over from the original site */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  /* Phones: smaller headline and hero image */
+  --breakpoint-phone: 480px;
+
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-fade-up: fade-up 700ms var(--ease-out-quad) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 100px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* Centered page column: 540 / 720 / 960 / 1040px wide, 20px side padding */
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 20px;
+  @media (width >= 576px) {
+    max-width: 540px;
+  }
+  @media (width >= 768px) {
+    max-width: 720px;
+  }
+  @media (width >= 992px) {
+    max-width: 960px;
+  }
+  @media (width >= 1200px) {
+    max-width: 1040px;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-white font-sans text-ink;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe-only {
+    animation: none !important;
+  }
+}
