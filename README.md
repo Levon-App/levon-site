@@ -18,7 +18,7 @@ npm run preview  # serve the production build
 ## Structure
 
 - `src/pages/index.astro`: the landing page
-- `src/components/`: header, footer and the Mailchimp waitlist form
+- `src/components/`: header, footer and the pick hero
 - `src/layouts/Base.astro`: `<head>` tags, title and description
 - `src/styles/global.css`: design tokens (colors, fonts, breakpoints) and the load animation
 - `src/components/PickCluster.astro`: the animated guitar-pick hero
