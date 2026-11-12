@@ -153,7 +153,9 @@ const sizes =
   .pick-letter {
     position: absolute;
     inset: 21.98% 32.92% 36.49% 33.27%;
-    background: var(--letterform) center / 100% 100% no-repeat;
+    /* The letterform SVG is used as a mask so its color comes from a token. */
+    background: var(--color-pick-letter);
+    mask: var(--letterform) center / 100% 100% no-repeat;
   }
 
   /*

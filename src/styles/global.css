@@ -19,6 +19,7 @@
   --color-pink-cadillac: #f761af;
   --color-blue-suede-shoes: #72c7e5;
   --color-green-river: #03a678;
+  --color-pick-letter: var(--color-brand); /* the "L" on each pick */
 
   /* Layout breakpoints carried over from the original site */
   --breakpoint-sm: 576px;
