@@ -18,14 +18,21 @@ const { class: className } = Astro.props;
 // Pick positions within the 868 × 901 cluster, from Figma (left, top in px).
 const CLUSTER = { w: 868, h: 901 };
 const PICK = { w: 443.564, h: 514.774 };
+// `stackTilt` is each pick's angle in the starting stack, before it fans out.
 const positions = [
-  { left: 186.65, top: 0, tilt: -7 },
-  { left: 0, top: 201.47, tilt: -12 },
-  { left: 424.44, top: 118.31, tilt: 9 },
-  { left: 269.15, top: 386.23, tilt: 4 },
+  { left: 186.65, top: 0, stackTilt: -6 },
+  { left: 0, top: 201.47, stackTilt: 4 },
+  { left: 424.44, top: 118.31, stackTilt: -2 },
+  { left: 269.15, top: 386.23, stackTilt: 2 },
 ];
 
 const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(3)}%`;
+// Offset that moves a pick from its final spot to the cluster's center,
+// as a percentage of the pick's own size (what CSS translate % uses).
+const stackOffset = (left: number, top: number) => ({
+  x: pct(CLUSTER.w / 2 - (left + PICK.w / 2), PICK.w),
+  y: pct(CLUSTER.h / 2 - (top + PICK.h / 2), PICK.h),
+});
 const resolveColor = (color: HeroPick['color']) =>
   color in brandColors ? brandColors[color as keyof typeof brandColors] : color;
 
@@ -41,6 +48,7 @@ const sizes =
   {
     heroPicks.map((pick, i) => {
       const pos = positions[i]!;
+      const stack = stackOffset(pos.left, pos.top);
       return (
         <div
           class="pick absolute"
@@ -50,7 +58,9 @@ const sizes =
             `width: ${pct(PICK.w, CLUSTER.w)}`,
             `height: ${pct(PICK.h, CLUSTER.h)}`,
             `--pick-color: ${resolveColor(pick.color)}`,
-            `--pick-tilt: ${pos.tilt}deg`,
+            `--stack-x: ${stack.x}`,
+            `--stack-y: ${stack.y}`,
+            `--stack-tilt: ${pos.stackTilt}deg`,
             `--pick-index: ${i}`,
           ].join('; ')}
         >
@@ -81,8 +91,8 @@ const sizes =
   /* Drop shadow sits outside the mask so it isn't clipped. */
   .pick {
     filter: drop-shadow(0 1.814cqw 1.209cqw rgb(1 1 1 / 0.15));
-    animation: pick-in 900ms cubic-bezier(0.2, 0.9, 0.25, 1.12) both;
-    animation-delay: calc(150ms + var(--pick-index) * 130ms);
+    animation: pick-fan 1500ms both;
+    animation-delay: calc(150ms + var(--pick-index) * 50ms);
   }
 
   .pick-shape {
@@ -117,34 +127,31 @@ const sizes =
     position: absolute;
     inset: 21.98% 32.92% 36.49% 33.27%;
     background: var(--letterform) center / 100% 100% no-repeat;
-    animation: letter-in 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: calc(550ms + var(--pick-index) * 130ms);
   }
 
-  @keyframes pick-in {
-    from {
+  /*
+   * The picks arrive as one neat stack in the middle of the cluster, then
+   * fan out to their spots. The "L" is part of each pick and never moves.
+   */
+  @keyframes pick-fan {
+    0% {
       opacity: 0;
-      transform: translate3d(0, 14%, 0) rotate(var(--pick-tilt)) scale(0.82);
+      transform: translate3d(var(--stack-x), calc(var(--stack-y) + 8%), 0) rotate(var(--stack-tilt)) scale(0.9);
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
-    to {
+    30% {
+      opacity: 1;
+      transform: translate3d(var(--stack-x), var(--stack-y), 0) rotate(var(--stack-tilt)) scale(1);
+      animation-timing-function: cubic-bezier(0.34, 1.25, 0.5, 1);
+    }
+    100% {
       opacity: 1;
       transform: none;
     }
   }
 
-  /* The "L" wipes up from its baseline once its pick has landed. */
-  @keyframes letter-in {
-    from {
-      clip-path: inset(100% 0 0 0);
-    }
-    to {
-      clip-path: inset(0);
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .pick,
-    .pick-letter {
+    .pick {
       animation: none;
     }
   }
